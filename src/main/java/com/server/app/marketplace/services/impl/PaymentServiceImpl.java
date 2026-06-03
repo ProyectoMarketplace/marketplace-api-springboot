@@ -54,7 +54,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         Payment payment = Payment.builder()
                 .order(order)
-                .amount(order.getTotal())
+                .amount(order.getFinalTotal() != null ? order.getFinalTotal() : order.getTotal())
                 .method(PaymentMethod.SIMULATED_CARD)
                 .status(paymentStatus)
                 .transactionReference(UUID.randomUUID().toString())

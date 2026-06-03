@@ -1,7 +1,9 @@
 package com.server.app.marketplace.controllers;
 
+import com.server.app.marketplace.domain.dto.request.CreateCouponRequest;
 import com.server.app.marketplace.domain.dto.response.GeneralResponse;
-import com.server.app.marketplace.services.OrderService;
+import com.server.app.marketplace.services.CouponService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -10,48 +12,47 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/api/coupons")
 @RequiredArgsConstructor
-public class OrderController {
+public class CouponController {
 
-    private final OrderService orderService;
+    private final CouponService couponService;
 
-    @PostMapping("/checkout/{buyerId}")
-    public ResponseEntity<GeneralResponse> checkout(@PathVariable Long buyerId) {
-        return buildResponse(
-                "Order created successfully.",
-                HttpStatus.CREATED,
-                orderService.checkout(buyerId)
-        );
-    }
-
-    @GetMapping("/my-orders/{buyerId}")
-    public ResponseEntity<GeneralResponse> getMyOrders(@PathVariable Long buyerId) {
-        return buildResponse(
-                "Orders found.",
-                HttpStatus.OK,
-                orderService.getMyOrders(buyerId)
-        );
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<GeneralResponse> getOrderById(@PathVariable Long id) {
-        return buildResponse(
-                "Order found.",
-                HttpStatus.OK,
-                orderService.getOrderById(id)
-        );
-    }
-
-    @PatchMapping("/{orderId}/apply-coupon/{code}")
-    public ResponseEntity<GeneralResponse> applyCoupon(
-            @PathVariable Long orderId,
-            @PathVariable String code
+    @PostMapping
+    public ResponseEntity<GeneralResponse> createCoupon(
+            @Valid @RequestBody CreateCouponRequest request
     ) {
         return buildResponse(
-                "Coupon applied successfully.",
+                "Coupon created successfully.",
+                HttpStatus.CREATED,
+                couponService.createCoupon(request)
+        );
+    }
+
+    @GetMapping
+    public ResponseEntity<GeneralResponse> getActiveCoupons() {
+        return buildResponse(
+                "Coupons found.",
                 HttpStatus.OK,
-                orderService.applyCoupon(orderId, code)
+                couponService.getActiveCoupons()
+        );
+    }
+
+    @GetMapping("/code/{code}")
+    public ResponseEntity<GeneralResponse> getCouponByCode(@PathVariable String code) {
+        return buildResponse(
+                "Coupon found.",
+                HttpStatus.OK,
+                couponService.getCouponByCode(code)
+        );
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    public ResponseEntity<GeneralResponse> deactivateCoupon(@PathVariable Long id) {
+        return buildResponse(
+                "Coupon deactivated successfully.",
+                HttpStatus.OK,
+                couponService.deactivateCoupon(id)
         );
     }
 

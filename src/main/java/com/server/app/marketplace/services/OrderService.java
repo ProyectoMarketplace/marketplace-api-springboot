@@ -11,4 +11,6 @@ public interface OrderService {
     List<OrderResponse> getMyOrders(Long buyerId);
 
     OrderResponse getOrderById(Long id);
+
+    OrderResponse applyCoupon(Long orderId, String code);
 }

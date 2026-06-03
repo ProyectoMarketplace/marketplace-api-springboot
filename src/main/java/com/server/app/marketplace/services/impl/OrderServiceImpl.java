@@ -16,7 +16,10 @@ import com.server.app.marketplace.services.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.server.app.marketplace.domain.entities.Coupon;
+import com.server.app.marketplace.repositories.CouponRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +33,8 @@ public class OrderServiceImpl implements OrderService {
     private final CartRepository cartRepository;
 
     private final ProductRepository productRepository;
+
+    private final CouponRepository couponRepository;
 
     private final UserRepository userRepository;
 
@@ -52,6 +57,9 @@ public class OrderServiceImpl implements OrderService {
         Order order = Order.builder()
                 .buyer(buyer)
                 .total(0.0)
+                .discountAmount(0.0)
+                .finalTotal(0.0)
+                .coupon(null)
                 .status(OrderStatus.CREATED)
                 .createdAt(LocalDateTime.now())
                 .items(new ArrayList<>())
@@ -88,6 +96,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         order.setTotal(total);
+        order.setFinalTotal(total);
 
         Order savedOrder = orderRepository.save(order);
 
@@ -95,6 +104,51 @@ public class OrderServiceImpl implements OrderService {
         cartRepository.save(cart);
 
         return orderMapper.toDto(savedOrder);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse applyCoupon(Long orderId, String code) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found."));
+
+        if (order.getStatus() != OrderStatus.CREATED) {
+            throw new BusinessRuleException("Coupons can only be applied to orders with CREATED status.");
+        }
+
+        if (order.getCoupon() != null) {
+            throw new BusinessRuleException("This order already has a coupon applied.");
+        }
+
+        Coupon coupon = couponRepository.findByCodeIgnoreCase(code)
+                .orElseThrow(() -> new ResourceNotFoundException("Coupon not found."));
+
+        validateCoupon(coupon);
+
+        boolean appliesToOrder = order.getItems()
+                .stream()
+                .anyMatch(item -> appliesToItem(coupon, item));
+
+        if (!appliesToOrder) {
+            throw new BusinessRuleException("Coupon does not apply to any product in this order.");
+        }
+
+        Double applicableSubtotal = order.getItems()
+                .stream()
+                .filter(item -> appliesToItem(coupon, item))
+                .mapToDouble(OrderItem::getSubtotal)
+                .sum();
+
+        Double discountAmount = applicableSubtotal * (coupon.getDiscountPercentage() / 100);
+        Double finalTotal = order.getTotal() - discountAmount;
+
+        order.setCoupon(coupon);
+        order.setDiscountAmount(discountAmount);
+        order.setFinalTotal(finalTotal);
+
+        Order updatedOrder = orderRepository.save(order);
+
+        return orderMapper.toDto(updatedOrder);
     }
 
     @Override
@@ -134,5 +188,39 @@ public class OrderServiceImpl implements OrderService {
         if (product.getStock() < quantity) {
             throw new BusinessRuleException("Not enough stock for product: " + product.getTitle());
         }
+    }
+
+    private void validateCoupon(Coupon coupon) {
+        if (!coupon.getActive()) {
+            throw new BusinessRuleException("Coupon is not active.");
+        }
+
+        LocalDate today = LocalDate.now();
+
+        if (coupon.getStartDate().isAfter(today)) {
+            throw new BusinessRuleException("Coupon is not valid yet.");
+        }
+
+        if (coupon.getEndDate().isBefore(today)) {
+            throw new BusinessRuleException("Coupon has expired.");
+        }
+    }
+
+    private boolean appliesToItem(Coupon coupon, OrderItem item) {
+        if (coupon.getCategory() != null) {
+            return item.getProduct()
+                    .getCategory()
+                    .getId()
+                    .equals(coupon.getCategory().getId());
+        }
+
+        if (coupon.getSellerProfile() != null) {
+            return item.getProduct()
+                    .getSellerProfile()
+                    .getId()
+                    .equals(coupon.getSellerProfile().getId());
+        }
+
+        return false;
     }
 }

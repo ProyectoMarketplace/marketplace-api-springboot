@@ -1,6 +1,6 @@
 package com.server.app.marketplace.domain.entities;
 
-import com.server.app.marketplace.common.enums.OrderStatus;
+import com.server.app.marketplace.common.enums.ConversationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,12 +8,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "conversations")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Order {
+public class Conversation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,26 +23,21 @@ public class Order {
     @JoinColumn(name = "buyer_id", nullable = false)
     private User buyer;
 
-    @Column(name = "total", nullable = false)
-    private Double total;
-
-    @Column(name = "discount_amount")
-    private Double discountAmount;
-
-    @Column(name = "final_total")
-    private Double finalTotal;
+    @ManyToOne
+    @JoinColumn(name = "seller_id", nullable = false)
+    private User seller;
 
     @ManyToOne
-    @JoinColumn(name = "coupon_id")
-    private Coupon coupon;
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private OrderStatus status;
+    private ConversationStatus status;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> items;
+    @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Message> messages;
 }

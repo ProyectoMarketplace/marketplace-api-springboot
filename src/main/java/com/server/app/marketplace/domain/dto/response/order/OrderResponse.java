@@ -20,6 +20,12 @@ public class OrderResponse {
 
     private Double total;
 
+    private Double discountAmount;
+
+    private Double finalTotal;
+
+    private String couponCode;
+
     private OrderStatus status;
 
     private LocalDateTime createdAt;
