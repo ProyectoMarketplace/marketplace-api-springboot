@@ -1,0 +1,11 @@
+meta {
+  name: Most Viewed Products
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/reports/products/most-viewed?requestingUserId={{adminUserId}}&limit=10
+  body: none
+  auth: none
+}

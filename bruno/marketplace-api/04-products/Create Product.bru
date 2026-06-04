@@ -1,0 +1,25 @@
+meta {
+  name: Create Product
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/products/{{sellerUserId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Laptop Lenovo",
+    "description": "Laptop en buen estado con 16GB RAM",
+    "price": 650.0,
+    "stock": 5,
+    "categoryId": {{categoryId}}
+  }
+}

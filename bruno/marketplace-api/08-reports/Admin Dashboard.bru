@@ -1,0 +1,11 @@
+meta {
+  name: Admin Dashboard
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/reports/dashboard?requestingUserId={{adminUserId}}&limit=5
+  body: none
+  auth: none
+}

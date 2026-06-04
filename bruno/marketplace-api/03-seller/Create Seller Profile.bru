@@ -1,0 +1,21 @@
+meta {
+  name: Create Seller Profile
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/sellers/profile/{{sellerUserId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "storeName": "Nami Store"
+  }
+}

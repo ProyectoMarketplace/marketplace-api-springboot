@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Marketplace API",
+      "request": "launch",
+      "mainClass": "com.server.app.marketplace.MarketplaceApplication",
+      "projectName": "marketplace",
+      "env": {
+        "DB_URL": "jdbc:postgresql://localhost:5432/marketplace_db",
+        "DB_USER": "postgres",
+        "DB_PASSWORD": "root"
+      }
+    }
+  ]
+}
