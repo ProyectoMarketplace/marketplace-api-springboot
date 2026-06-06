@@ -1,0 +1,11 @@
+meta {
+  name: Seller Summary
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/reports/sellers/{{sellerUserId}}?requestingUserId={{sellerUserId}}&limit=5
+  body: none
+  auth: none
+}

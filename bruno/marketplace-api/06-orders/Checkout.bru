@@ -1,0 +1,11 @@
+meta {
+  name: Checkout
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/orders/checkout/{{buyerId}}
+  body: none
+  auth: none
+}

@@ -1,0 +1,11 @@
+meta {
+  name: Top Sold Products
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/reports/products/top-sold?requestingUserId={{adminUserId}}&limit=10
+  body: none
+  auth: none
+}
