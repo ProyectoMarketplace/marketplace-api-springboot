@@ -1,0 +1,22 @@
+meta {
+  name: Seller Respond
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{baseUrl}}/api/disputes/{{disputeId}}/respond
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "sellerUserId": {{sellerUserId}},
+    "sellerResponse": "El producto se envió en buen estado según registro de envío."
+  }
+}

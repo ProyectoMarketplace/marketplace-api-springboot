@@ -87,3 +87,4 @@ Los tests usan H2 en memoria (`src/test/resources/application.properties`).
 | Docker: socket no encontrado | Abre **Docker Desktop** y vuelve a ejecutar `./scripts/dev-up.sh` |
 | Error de conexión a PostgreSQL | Confirma que el contenedor está arriba: `docker compose ps` |
 | Puerto ocupado | Cambia `server.port` en `application.properties` (por defecto: **8081**) |
+| Error `payments_status_check` al reembolsar | Reinicia la app (actualiza el constraint al arrancar) o ejecuta `scripts/fix-payment-status-constraint.sql` en PgAdmin |

@@ -1,0 +1,26 @@
+package com.server.app.marketplace.domain.dto.request;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class CreateDisputeRequest {
+
+    @NotNull(message = "Buyer id is required.")
+    private Long buyerId;
+
+    @NotNull(message = "Order item id is required.")
+    private Long orderItemId;
+
+    @NotNull(message = "Quantity is required.")
+    @Min(value = 1, message = "Quantity must be at least 1.")
+    private Integer quantity;
+
+    @NotBlank(message = "Reason is required.")
+    private String reason;
+}

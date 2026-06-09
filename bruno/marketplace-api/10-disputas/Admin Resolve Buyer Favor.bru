@@ -1,0 +1,23 @@
+meta {
+  name: Admin Resolve Buyer Favor
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{baseUrl}}/api/disputes/{{disputeId}}/resolve
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "adminUserId": {{adminUserId}},
+    "resolution": "BUYER_FAVOR",
+    "adminNotes": "Evidencia del comprador válida. Se ordena reembolso."
+  }
+}

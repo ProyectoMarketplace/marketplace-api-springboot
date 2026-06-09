@@ -1,0 +1,11 @@
+meta {
+  name: Admin Pending Disputes
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/disputes/admin/pending?adminUserId={{adminUserId}}
+  body: none
+  auth: none
+}
