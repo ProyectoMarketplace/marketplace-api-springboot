@@ -1,0 +1,21 @@
+meta {
+  name: Process Refund
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/api/returns/{{returnId}}/refund
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "sellerUserId": {{sellerUserId}}
+  }
+}
