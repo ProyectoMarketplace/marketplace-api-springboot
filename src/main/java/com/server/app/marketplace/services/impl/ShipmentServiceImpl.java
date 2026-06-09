@@ -2,9 +2,14 @@ package com.server.app.marketplace.services.impl;
 
 import com.server.app.marketplace.common.enums.OrderStatus;
 import com.server.app.marketplace.common.enums.ShipmentStatus;
+import com.server.app.marketplace.common.enums.UserRole;
 import com.server.app.marketplace.common.mappers.ShippingMapper;
 import com.server.app.marketplace.domain.dto.request.CalculateShipmentRequest;
 import com.server.app.marketplace.domain.dto.request.CreateShipmentRequest;
+import com.server.app.marketplace.domain.dto.request.MarkOrderDeliveredRequest;
+import com.server.app.marketplace.domain.entities.OrderItem;
+import com.server.app.marketplace.domain.entities.User;
+import com.server.app.marketplace.repositories.UserRepository;
 import com.server.app.marketplace.domain.dto.response.shipping.ShipmentCostResponse;
 import com.server.app.marketplace.domain.dto.response.shipping.ShipmentResponse;
 import com.server.app.marketplace.domain.entities.Order;
@@ -33,6 +38,8 @@ public class ShipmentServiceImpl implements ShipmentService {
     private final ShippingMethodRepository shippingMethodRepository;
 
     private final ShippingMapper shippingMapper;
+
+    private final UserRepository userRepository;
 
     @Override
     public ShipmentCostResponse calculateShipment(CalculateShipmentRequest request) {
@@ -82,6 +89,42 @@ public class ShipmentServiceImpl implements ShipmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Shipment not found."));
 
         return shippingMapper.toShipmentDto(shipment);
+    }
+
+    @Override
+    @Transactional
+    public ShipmentResponse markOrderAsDelivered(Long orderId, MarkOrderDeliveredRequest request) {
+        User seller = userRepository.findById(request.getSellerUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+
+        if (seller.getRole() != UserRole.SELLER) {
+            throw new BusinessRuleException("Only SELLER users can mark orders as delivered.");
+        }
+
+        Order order = findOrder(orderId);
+
+        if (order.getStatus() != OrderStatus.SHIPPED) {
+            throw new BusinessRuleException("Only SHIPPED orders can be marked as delivered.");
+        }
+
+        boolean sellerOwnsItem = order.getItems().stream()
+                .map(OrderItem::getProduct)
+                .anyMatch(product -> product.getSellerProfile().getUser().getId().equals(seller.getId()));
+
+        if (!sellerOwnsItem) {
+            throw new BusinessRuleException("This seller cannot mark this order as delivered.");
+        }
+
+        Shipment shipment = shipmentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Shipment not found."));
+
+        order.setStatus(OrderStatus.DELIVERED);
+        shipment.setStatus(ShipmentStatus.DELIVERED);
+
+        orderRepository.save(order);
+        Shipment savedShipment = shipmentRepository.save(shipment);
+
+        return shippingMapper.toShipmentDto(savedShipment);
     }
 
     private Order findOrder(Long orderId) {

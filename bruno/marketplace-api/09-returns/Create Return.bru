@@ -1,0 +1,24 @@
+meta {
+  name: Create Return
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/returns
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "buyerId": {{buyerId}},
+    "orderItemId": 1,
+    "quantity": 1,
+    "reason": "Producto llegó dañado"
+  }
+}

@@ -2,6 +2,7 @@ package com.server.app.marketplace.controllers;
 
 import com.server.app.marketplace.domain.dto.request.CalculateShipmentRequest;
 import com.server.app.marketplace.domain.dto.request.CreateShipmentRequest;
+import com.server.app.marketplace.domain.dto.request.MarkOrderDeliveredRequest;
 import com.server.app.marketplace.domain.dto.response.GeneralResponse;
 import com.server.app.marketplace.services.ShipmentService;
 import jakarta.validation.Valid;
@@ -47,6 +48,18 @@ public class ShipmentController {
                 "Shipment found.",
                 HttpStatus.OK,
                 shipmentService.getShipmentByOrderId(orderId)
+        );
+    }
+
+    @PatchMapping("/order/{orderId}/deliver")
+    public ResponseEntity<GeneralResponse> markOrderAsDelivered(
+            @PathVariable Long orderId,
+            @Valid @RequestBody MarkOrderDeliveredRequest request
+    ) {
+        return buildResponse(
+                "Order marked as delivered successfully.",
+                HttpStatus.OK,
+                shipmentService.markOrderAsDelivered(orderId, request)
         );
     }
 

@@ -1,0 +1,11 @@
+meta {
+  name: Approve Return
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{baseUrl}}/api/returns/{{returnId}}/approve?sellerUserId={{sellerUserId}}
+  body: none
+  auth: none
+}
