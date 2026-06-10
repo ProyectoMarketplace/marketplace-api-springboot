@@ -2,8 +2,11 @@ package com.server.app.marketplace.services.impl;
 
 import com.server.app.marketplace.common.enums.ProductStatus;
 import com.server.app.marketplace.common.mappers.ProductMapper;
+import com.server.app.marketplace.common.enums.UserRole;
 import com.server.app.marketplace.domain.dto.request.CreateProductRequest;
+import com.server.app.marketplace.domain.dto.request.UpdateProductPriceRequest;
 import com.server.app.marketplace.domain.dto.response.product.ProductResponse;
+import com.server.app.marketplace.domain.entities.User;
 import com.server.app.marketplace.domain.entities.Category;
 import com.server.app.marketplace.domain.entities.Product;
 import com.server.app.marketplace.domain.entities.SellerProfile;
@@ -12,6 +15,8 @@ import com.server.app.marketplace.exceptions.ResourceNotFoundException;
 import com.server.app.marketplace.repositories.CategoryRepository;
 import com.server.app.marketplace.repositories.ProductRepository;
 import com.server.app.marketplace.repositories.SellerProfileRepository;
+import com.server.app.marketplace.repositories.UserRepository;
+import com.server.app.marketplace.services.PriceNotificationService;
 import com.server.app.marketplace.services.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +35,10 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
 
     private final ProductMapper productMapper;
+
+    private final UserRepository userRepository;
+
+    private final PriceNotificationService priceNotificationService;
 
     @Override
     @Transactional
@@ -98,6 +107,45 @@ public class ProductServiceImpl implements ProductService {
 
         product.setStatus(ProductStatus.REJECTED);
         Product updatedProduct = productRepository.save(product);
+
+        return productMapper.toDto(updatedProduct);
+    }
+
+    @Override
+    @Transactional
+    public ProductResponse updateProductPrice(Long id, UpdateProductPriceRequest request) {
+        User seller = userRepository.findById(request.getSellerUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+
+        if (!Boolean.TRUE.equals(seller.getActive())) {
+            throw new BusinessRuleException("User is inactive.");
+        }
+
+        if (seller.getRole() != UserRole.SELLER) {
+            throw new BusinessRuleException("Only SELLER users can update product prices.");
+        }
+
+        Product product = findProduct(id);
+
+        if (!product.getSellerProfile().getUser().getId().equals(seller.getId())) {
+            throw new BusinessRuleException("This product does not belong to the seller.");
+        }
+
+        if (product.getStatus() != ProductStatus.APPROVED) {
+            throw new BusinessRuleException("Only APPROVED products can update price.");
+        }
+
+        Double previousPrice = product.getPrice();
+        Double newPrice = request.getNewPrice();
+
+        if (newPrice.equals(previousPrice)) {
+            throw new BusinessRuleException("New price must be different from the current price.");
+        }
+
+        product.setPrice(newPrice);
+        Product updatedProduct = productRepository.save(product);
+
+        priceNotificationService.processPriceDrop(updatedProduct, previousPrice, newPrice);
 
         return productMapper.toDto(updatedProduct);
     }

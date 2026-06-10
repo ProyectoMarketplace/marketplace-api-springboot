@@ -1,0 +1,11 @@
+meta {
+  name: Mark Notification Read
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/api/price-notifications/1/read?buyerId={{buyerId}}
+  body: none
+  auth: none
+}
