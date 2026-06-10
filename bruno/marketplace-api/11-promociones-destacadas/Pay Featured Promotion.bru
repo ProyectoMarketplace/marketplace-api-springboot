@@ -1,0 +1,22 @@
+meta {
+  name: Pay Featured Promotion
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{baseUrl}}/api/featured-promotions/1/pay
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "sellerUserId": {{sellerUserId}},
+    "approved": true
+  }
+}

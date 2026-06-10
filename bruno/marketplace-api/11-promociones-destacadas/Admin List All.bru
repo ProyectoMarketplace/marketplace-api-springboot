@@ -1,0 +1,11 @@
+meta {
+  name: Admin List All
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/featured-promotions/admin/all?adminUserId={{adminUserId}}
+  body: none
+  auth: none
+}

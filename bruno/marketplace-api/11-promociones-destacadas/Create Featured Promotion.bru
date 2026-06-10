@@ -1,0 +1,25 @@
+meta {
+  name: Create Featured Promotion
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/featured-promotions
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "sellerUserId": {{sellerUserId}},
+    "productId": 1,
+    "startDate": "2026-06-10",
+    "endDate": "2026-06-20",
+    "visibilityFee": 55.0
+  }
+}
