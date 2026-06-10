@@ -1,0 +1,23 @@
+meta {
+  name: Create Price Alert
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/price-notifications/alerts
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "buyerId": {{buyerId}},
+    "productId": 1,
+    "targetPrice": 600.0
+  }
+}

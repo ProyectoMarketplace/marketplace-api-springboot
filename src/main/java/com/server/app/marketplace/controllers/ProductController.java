@@ -1,6 +1,7 @@
 package com.server.app.marketplace.controllers;
 
 import com.server.app.marketplace.domain.dto.request.CreateProductRequest;
+import com.server.app.marketplace.domain.dto.request.UpdateProductPriceRequest;
 import com.server.app.marketplace.domain.dto.response.GeneralResponse;
 import com.server.app.marketplace.services.ProductService;
 import jakarta.validation.Valid;
@@ -54,6 +55,18 @@ public class ProductController {
                 "Product approved successfully.",
                 HttpStatus.OK,
                 productService.approveProduct(id)
+        );
+    }
+
+    @PatchMapping("/{id}/price")
+    public ResponseEntity<GeneralResponse> updateProductPrice(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateProductPriceRequest request
+    ) {
+        return buildResponse(
+                "Product price updated successfully.",
+                HttpStatus.OK,
+                productService.updateProductPrice(id, request)
         );
     }
 

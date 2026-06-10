@@ -1,0 +1,22 @@
+meta {
+  name: Update Product Price
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{baseUrl}}/api/products/1/price
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "sellerUserId": {{sellerUserId}},
+    "newPrice": 580.0
+  }
+}
