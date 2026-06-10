@@ -1,0 +1,24 @@
+meta {
+  name: Create Dispute
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/disputes
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "buyerId": {{buyerId}},
+    "orderItemId": 1,
+    "quantity": 1,
+    "reason": "El vendedor rechazó mi devolución y el producto llegó dañado"
+  }
+}
