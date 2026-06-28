@@ -33,12 +33,13 @@ public class UserMapper {
                 .build();
     }
 
-    public LoginResponse toLoginDto(User user) {
+    public LoginResponse toLoginDto(User user, String token) {
         return LoginResponse.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .token(token)
                 .message("Login successful")
                 .build();
     }

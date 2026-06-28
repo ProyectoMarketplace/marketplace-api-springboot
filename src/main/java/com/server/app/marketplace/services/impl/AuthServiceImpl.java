@@ -10,6 +10,8 @@ import com.server.app.marketplace.exceptions.BusinessRuleException;
 import com.server.app.marketplace.exceptions.ResourceNotFoundException;
 import com.server.app.marketplace.repositories.UserRepository;
 import com.server.app.marketplace.services.AuthService;
+import com.server.app.marketplace.security.JwtService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,10 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserMapper userMapper;
 
+    private final PasswordEncoder passwordEncoder;
+
+    private final JwtService jwtService;
+
     @Override
     @Transactional
     public UserResponse register(RegisterRequest request) {
@@ -30,6 +36,8 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User user = userMapper.toEntity(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
         User savedUser = userRepository.save(user);
 
         return userMapper.toDto(savedUser);
@@ -40,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmailIgnoreCase(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
-        if (!user.getPassword().equals(request.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BusinessRuleException("Invalid credentials.");
         }
 
@@ -48,6 +56,9 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessRuleException("User account is inactive.");
         }
 
-        return userMapper.toLoginDto(user);
+        String token = jwtService.generateToken(user);
+
+        return userMapper.toLoginDto(user, token);
     }
+
 }
